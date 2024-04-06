@@ -9,6 +9,7 @@ BEGIN
 	FROM SINHVIEN
 END
 
+-- 1.1 Thực thi
 EXEC In_DSSV
 
 -- 2. Yêu cầu: In ra danh sách giáo viên với đầy đủ các thuộc tính của bảng GIAOVIEN.
@@ -19,6 +20,7 @@ BEGIN
 	FROM GIAOVIEN
 END
 
+--2.1 Thực thi
 EXEC In_DSGV
 
 -- 3. Yêu cầu: In ra danh sách các hội đồng (MSHD, PHONG) đối với những hội đồng diễn ra vào tháng 12. 
@@ -30,6 +32,7 @@ BEGIN
 	WHERE MONTH(NGAYHD) = 12
 END
 
+-- 3.1 Thực thi
 EXEC In_DSHD
 
 -- 4. Yêu cầu: In ra điểm phản biện cao nhất và điểm phản biện thấp nhất trong số các đề tài được phản biện. 
@@ -40,6 +43,7 @@ BEGIN
 	FROM GV_PBDT
 END
 
+-- 4.1 Thực thi
 EXEC In_DiemPB
 
 -- 5. Yêu cầu: In ra danh sách giáo viên (TENGV) và mã số đề tài (MSDT) mà giáo viên đó hướng dẫn (nếu có). 
@@ -50,6 +54,7 @@ BEGIN
     FROM GIAOVIEN GV LEFT JOIN GV_HDDT GVHD ON GVHD.MSGV = GV.MSGV  
 END
 
+-- 5.1 Thực thi
 EXEC In_GVHD
 
 -- 6. Yêu cầu: In ra danh sách đề tài (TENDT) và số lượng sinh viên thực hiện của mỗi đề tài. 
@@ -61,6 +66,7 @@ BEGIN
 	GROUP BY TENDT
 END
 
+-- 6.1 Thực thi
 EXEC In_DSDT
 
 -- 7. Yêu cầu: In ra danh sách các giáo viên (TENGV) đạt học hàm (TENHH) ‘GIÁO SƯ’.
@@ -70,6 +76,8 @@ BEGIN
 	SELECT TENGV, TENHH
 	FROM GIAOVIEN GV JOIN HOCHAM HH ON GV.MSHH = HH.MSHH
 END
+
+-- 7.1 Thực thi
 
 EXEC In_DSGV_HH
 /* 8. *Yêu cầu: In ra danh sách giáo vên theo định dạng: <TENHV TENGV>
@@ -83,7 +91,9 @@ BEGIN
     JOIN HOCVI HV ON HV.MSHV = GH.MSHV
 END
 
+-- 8.1 Thực thi
 EXEC In_GSGV_HV
+
 -- 9. Yêu cầu: In ra danh sách giáo viên (TENGV), học vị (TENHV) và chuyên ngành  (TENCN) mà giáo viên đó đã đạt được. 
 CREATE PROC In_DSGV_HV_CN
 AS
@@ -95,6 +105,7 @@ BEGIN
 	JOIN CHUYENNGANH DT ON DT.MSCN = GH.MSCN
 END
 
+-- 9.1 Thực thi
 EXEC In_DSGV_HV_CN
 
 -- Bài tập 2. Thủ tục lưu trữ có tham số vào 
@@ -109,6 +120,7 @@ BEGIN
 	WHERE MSSV = @MSSV
 END
 
+-- a1. Thực thi
 EXEC B2_In_DSSV '13520001'
 EXEC B2_In_DSSV '13520006'
 EXEC B2_In_DSSV '13520008'
@@ -122,6 +134,7 @@ BEGIN
 	WHERE MSDT = @MSDT
 END
 
+-- a2. Thực thi
 EXEC B2_In_DSDT '97004'
 EXEC B2_In_DSDT '97006'
 EXEC B2_In_DSDT '97090'
@@ -136,6 +149,7 @@ BEGIN
 	WHERE MSHD = @MSHD
 END
 
+-- a3. Thực thi
 EXEC B2_In_DSHD 1
 EXEC B2_In_DSHD 3
 EXEC B2_In_DSHD 10
@@ -151,6 +165,7 @@ BEGIN
 	WHERE TENGV = @TENGV
 END
 
+-- a4. Thực thi
 EXEC In_DSDT_GVHD N'Trần Thu Trang'
 EXEC In_DSDT_GVHD N'Chu Tiến'
 EXEC In_DSDT_GVHD N'Nguyễn Văn B'
@@ -164,10 +179,10 @@ BEGIN
 	WHERE MSDT = @MSDT
 END
 	
+-- a5. Thực thi
 EXEC B2_DSSV_DT '97003'
 EXEC B2_DSSV_DT '97005'
 EXEC B2_DSSV_DT '97006'
-
 
 --	6*. Tham số đưa vào: MSGV. Yêu cầu: In ra họ tên (TENGV) và tên học vị (TENHV) của giáo viên đó theo định dạng: <TENHV TENGV> 
 -- (Lưu ý: Trường hợp giáo viên đạt một học vị ở nhiều chuyên ngành thì chỉ in ra một lần). 
@@ -181,6 +196,7 @@ BEGIN
 	WHERE GV.MSGV = @MSGV
 END
 
+-- a6. Thực thi
 EXEC B2_In_GSGV_HV '00201'
 EXEC B2_In_GSGV_HV '00204'
 EXEC B2_In_GSGV_HV '00206'
@@ -194,12 +210,15 @@ BEGIN
 	WHERE HDDT.MSHD = @MSHD
 END
 
-EXEC B2_In_DSDT_HD '1'
-EXEC B2_In_DSDT_HD '2'
-EXEC B2_In_DSDT_HD '3'
+-- a7. Thực thi
+EXEC B2_In_DSDT_HD 1
+EXEC B2_In_DSDT_HD 2
+EXEC B2_In_DSDT_HD 3
 
 -- b.Thủ tục lưu trữ có nhiều tham số vào
--- 	8.	Tham số đưa vào: MSGV, TENGV, SODT, DIACHI, MSHH, NAMHH. Yêu cầu: Thêm dữ liệu mới vào bảng GIAOVIEN với các thông tin được đưa vào. 
+
+/* 	8.	Tham số đưa vào: MSGV, TENGV, SODT, DIACHI, MSHH, NAMHH.
+Yêu cầu: Thêm dữ liệu mới vào bảng GIAOVIEN với các thông tin được đưa vào. */
 CREATE PROC B2_Them_DSGV_HH @MSGV CHAR(5), @TENGV NVARCHAR(30), @DIACHI NVARCHAR(50),
 @SODT VARCHAR(10),  @MSHH INT, @NAMHH SMALLDATETIME
 AS
@@ -216,16 +235,14 @@ BEGIN
 		RETURN 0
 	END
 END
+
+-- b8. Thực thi
 EXEC B2_Them_DSGV_HH '00269', N'Trần Thị Bưởi', '123 L.A.', '0969969966', 7, '2069'
 EXEC B2_Them_DSGV_HH '00269', N'Trần Thị Bưởi', '123 L.A.', '0969969966', 1, '2069'
 EXEC B2_Them_DSGV_HH '00232', N'Lê Minh Tấn', '135 C.F.', '0123456789', 2, '1990'
 
 /*	9.	Tham số đưa vào: MSGV, TENGV, SODT, DIACHI, MSHH, NAMHH. 
-	Yêu cầu: Thêm dữ liệu mới vào bảng GIAOVIEN với các thông tin được đưa vào. 
-	Trước khi thêm dữ liệu, cần kiểm tra MSGV trong bảng GIAOVIEN có trùng không,
-	nếu trùng thì thông báo ‘Mã giáo viên bị trùng’ và trả về giá trị 0, ngược lại thì thêm dữ liệu mới, 
-	thông báo ‘Thêm dữ liệu thành công’ và trả về giá trị 1. 
-*/
+	Yêu cầu: Thêm dữ liệu mới vào bảng GIAOVIEN với các thông tin được đưa vào. */
 CREATE PROC B2_Them_DSGV @MSGV CHAR(5), @TENGV NVARCHAR(20), @DIACHI NVARCHAR(50),
 @SODT NVARCHAR(10), @MSHH INT, @NAMHH SMALLDATETIME
 AS
@@ -244,6 +261,7 @@ BEGIN
 	END
 END
 
+-- b9. Thực thi
 EXEC B2_Them_DSGV '00222', N'Trần Thị Lung Linh', 'New York', '0123456789', 2, '2016' 
 EXEC B2_Them_DSGV '00202', N'Lê Minh Tường', 'Carlifornia', '082344950', 1,'2022'
 EXEC B2_Them_DSGV '00231', N'Đặng Minh Châu', 'Los Angeles', '0987654321', 1, '2011'
@@ -274,7 +292,9 @@ BEGIN
 		RAISERROR (N'Mã giáo viên bị trùng', 8, 16)
 		RETURN 0
 	END
-END		
+END	
+
+-- b10. Thực thi
 EXEC B2_Them_DSGV_MS_HH '00229', N'Tạ Tấn', 'VietNam', '0124856789', 3, '2016'
 EXEC B2_Them_DSGV_MS_HH '00233', N'Nguyễn Dũng', 'Canada', '0187678578', 2, '2023'
 EXEC B2_Them_DSGV_MS_HH '00222', N'Trần Hoàng Thư', 'B.P', '0715272899', 1 , '2017'
@@ -298,17 +318,13 @@ BEGIN
 	END
 END
 
+-- b11. Thực thi
 EXEC B2_Update_DT '97002', N'Nhận dạng khuôn mặt' 
 EXEC B2_Update_DT '97005', N'Phần mềm xử lý ảnh' 
 EXEC B2_Update_DT '97009', N'Quản lý trường đại học' 
 
-/*	12.	Tham số đưa vào: MSSV cũ, TENSV mới, DIACHI mới. 
-	Yêu cầu: Cập nhật họ tên và địa chỉ mới của sinh viên với mã sinh viên không đổi.
-	Trước khi cập nhật, cần kiểm tra xem MSSV đã tồn tại trong bảng SINHVIEN chưa,
-	nếu không tìm thấy thì thông báo ‘Không tìm thấy sinh viên’ và trả về giá trị 0, 
-	ngược lại thì cập nhật dữ liệu, thông báo ‘Cập nhật dữ liệu thành công’ và trả về giá trị 1. 
-
-*/
+--	12.	Tham số đưa vào: MSSV cũ, TENSV mới, DIACHI mới. 
+--  Yêu cầu: Cập nhật họ tên và địa chỉ mới của sinh viên với mã sinh viên không đổi.
 CREATE PROC B2_Update_DSSV @MSSV CHAR(8), @TENSV NVARCHAR(30), @DIACHI NCHAR(50)
 AS
 BEGIN 
@@ -332,18 +348,16 @@ BEGIN
 	END
 END
 
+-- b12. Thực thi
 EXEC B2_Update_DSSV '13520002', N'Trần Khánh Nguyên', N'QUẬN 6' 
 EXEC B2_Update_DSSV '13520005', N'Lê Thị Thúy Hằng', N'GÒ VẤP'
 EXEC B2_Update_DSSV '13520008', N'Lê Minh An', N'QUẬN 7'
-
 
 -- Bài tập 3. Thủ tục lưu trữ có tham số vào và tham số ra 
 
 /*	1.Tham số đưa vào: TENGV. 
 	Tham số trả ra: SDT. 
-	Yêu cầu: Đưa vào họ tên giáo viên (TENGV), 
-	trả ra số điện thoại (SDT) của giáo viên đó, 
-	nếu không tìm thấy giáo viên tương ứng thì thông báo ‘Không tìm thấy giáo viên’ và trả về giá trị 0. */
+	Yêu cầu: Đưa vào họ tên giáo viên (TENGV), trả ra số điện thoại (SDT) của giáo viên đó */
 CREATE PROC B3_Tim_SDT @TENGV NVARCHAR(30), @SDT VARCHAR(10) OUT
 AS
 BEGIN
@@ -356,6 +370,7 @@ BEGIN
 	END
 END
 
+-- 3.1 Thực thi
 GO
 DECLARE @sdt VARCHAR(10)
 EXEC B3_Tim_SDT @TENGV = N'Nguyễn Văn An', @SDT = @sdt OUT
@@ -402,11 +417,7 @@ PRINT @sdt
 
 /*	2.Tham số đưa vào: TENSV. 
 	Tham số trả ra: MSDT. 
-	Yêu cầu: Đưa vào họ tên sinh viên (TENSV), 
-	trả ra mã số đề tài (MSDT) mà sinh viên đó đã thực hiện, 
-	nếu không tìm thấy sinh viên tương ứng thì thông báo ‘Không tìm thấy sinh viên’ 
-	và trả về giá trị 0. 
-*/
+	Yêu cầu: Đưa vào họ tên sinh viên (TENSV), trả ra mã số đề tài (MSDT) mà sinh viên đó đã thực hiện, */
 CREATE PROC B3_Tim_MSDT @TENSV NVARCHAR(30), @MSDT CHAR(6) OUT
 AS
 BEGIN
@@ -418,6 +429,8 @@ BEGIN
 		RETURN 0
 	END
 END
+
+-- 3.2 Thực thi
 GO
 DECLARE @msdt CHAR(6)
 EXEC B3_Tim_MSDT N'Phan Tấn Đạt', @MSDT = @msdt OUT
@@ -435,10 +448,7 @@ PRINT @msdt
 
 /*	3.Tham số đưa vào: TENHV. 
 	Tham số trả ra: SLGV. 
-	Yêu cầu: Đưa vào tên học vị (TENHV), trả ra số lượng giáo viên (SLGV) đạt học vị đó, 
-	nếu không tìm thấy học vị tương ứng thì thông báo ‘Không tìm thấy học vị’ và trả về giá trị 0. 
-*/
-
+	Yêu cầu: Đưa vào tên học vị (TENHV), trả ra số lượng giáo viên (SLGV) đạt học vị đó.*/
 CREATE PROC B3_Dem_SLGV_HV @TENHV NVARCHAR(20), @SLGV INT OUT
 AS
 BEGIN
@@ -454,6 +464,7 @@ BEGIN
 	END
 END	
 
+-- 3.3 Thực thi
 GO
 DECLARE @slgv INT
 EXEC B3_Dem_SLGV_HV N'Kỹ sư', @SLGV = @slgv OUT
@@ -466,14 +477,8 @@ GO
 DECLARE @slgv INT
 EXEC B3_Dem_SLGV_HV N'Bác sĩ', @SLGV = @slgv OUT
 
-/* 4.	Tham số đưa vào: MSDT. 
-		Tham số trả ra: DTB. 
-		Yêu cầu: Đưa vào mã số đề tài (MSDT), 
-		trả ra điểm trung bình (DTB) của đề tài (trung bình cộng điểm của giáo viên hướng dẫn, cán bộ phản biện và ủy viên hội đồng), 
-		nếu không tìm thấy đề tài tương ứng thì thông báo ‘Không tìm thấy đề tài’ và trả về giá trị 0.
-		Trong trường hợp đề tài chưa được hoàn thành hoặc chưa được chấm điểm (bởi giáo viên hướng dẫn, cán bộ phản biện và ủy viên hội đồng), 
-		thông báo ‘Đề tài chưa được hoàn thành’ và trả về giá trị 0. 
-*/
+/* 4.	Tham số đưa vào: MSDT. Tham số trả ra: DTB. 
+		Yêu cầu: Đưa vào mã số đề tài (MSDT), trả ra điểm trung bình (DTB) của đề tài*/
 CREATE PROC B3_Tinh_DTB @MSDT CHAR(6), @DTB NUMERIC(5,2) OUT
 AS
 BEGIN
@@ -501,6 +506,7 @@ BEGIN
 		END
 END 
 
+-- 3.4 Thực thi
 GO
 DECLARE @dtb NUMERIC(5,2)
 EXEC B3_Tinh_DTB '97003', @dtb = @DTB OUT
@@ -517,12 +523,8 @@ GO
 DECLARE @dtb NUMERIC(5,2)
 EXEC B3_Tinh_DTB '97006', @dtb = @DTB OUT
 	
-/*	5* .Tham số đưa vào: MSHD. 
-	Tham số trả ra: DTB_HD. 
-	Yêu cầu: Đưa vào mã số hội đồng (MSHD), 
-	trả ra điểm trung bình các đề tài của hội đồng đó (DTB_HD), 
-	nếu không tìm thấy đề tài tương ứng thì thông báo ‘Không tìm thấy hội đồng’ và trả về giá trị 0. 
-*/
+/*	5* .Tham số đưa vào: MSHD. Tham số trả ra: DTB_HD. 
+	Yêu cầu: Đưa vào mã số hội đồng (MSHD), trả ra điểm trung bình các đề tài của hội đồng đó (DTB_HD)*/
 
 CREATE PROC Tinh_DTB_HD @MSHD INT, @DTB_HD NUMERIC(5,2) OUT
 AS
@@ -534,11 +536,10 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		
         
 
-GO
-DECLARE @dtb_hd NUMERIC(5,2)
-EXEC B3_Diem_Detai_HD '1', @dtb_hd = @DTB_HD OUT
+
 
 /*	6.Đưa vào TENGV và cho biết: Số đề tài hướng dẫn, số đề tài phản biện do giáo 
 viên đó phụ trách. Nếu trùng tên thì có báo lỗi không hay hệ thống sẽ đếm tất cả các đề tài của những giáo viên trùng tên đó? Tại sao? Làm sao để hiện thông báo có bao nhiêu giáo viên trùng tên và trả về thông tin được yêu cầu. Cần lưu ý gì với tham số vào không để không xảy ra lỗi tương tự hoặc tính hết các trường hợp để không báo lỗi và kết quả trả về đúng? 
