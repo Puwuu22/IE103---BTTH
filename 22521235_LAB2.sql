@@ -20,7 +20,7 @@ BEGIN
 	FROM GIAOVIEN
 END
 
---2.1 Thực thi
+-- 1.2 Thực thi
 EXEC In_DSGV
 
 -- 3. Yêu cầu: In ra danh sách các hội đồng (MSHD, PHONG) đối với những hội đồng diễn ra vào tháng 12. 
@@ -32,7 +32,7 @@ BEGIN
 	WHERE MONTH(NGAYHD) = 12
 END
 
--- 3.1 Thực thi
+-- 1.3 Thực thi
 EXEC In_DSHD
 
 -- 4. Yêu cầu: In ra điểm phản biện cao nhất và điểm phản biện thấp nhất trong số các đề tài được phản biện. 
@@ -43,7 +43,7 @@ BEGIN
 	FROM GV_PBDT
 END
 
--- 4.1 Thực thi
+-- 1.4 Thực thi
 EXEC In_DiemPB
 
 -- 5. Yêu cầu: In ra danh sách giáo viên (TENGV) và mã số đề tài (MSDT) mà giáo viên đó hướng dẫn (nếu có). 
@@ -54,7 +54,7 @@ BEGIN
     FROM GIAOVIEN GV LEFT JOIN GV_HDDT GVHD ON GVHD.MSGV = GV.MSGV  
 END
 
--- 5.1 Thực thi
+-- 1.5 Thực thi
 EXEC In_GVHD
 
 -- 6. Yêu cầu: In ra danh sách đề tài (TENDT) và số lượng sinh viên thực hiện của mỗi đề tài. 
@@ -66,7 +66,7 @@ BEGIN
 	GROUP BY TENDT
 END
 
--- 6.1 Thực thi
+-- 1.6 Thực thi
 EXEC In_DSDT
 
 -- 7. Yêu cầu: In ra danh sách các giáo viên (TENGV) đạt học hàm (TENHH) ‘GIÁO SƯ’.
@@ -77,7 +77,7 @@ BEGIN
 	FROM GIAOVIEN GV JOIN HOCHAM HH ON GV.MSHH = HH.MSHH
 END
 
--- 7.1 Thực thi
+-- 1.7 Thực thi
 
 EXEC In_DSGV_HH
 /* 8. *Yêu cầu: In ra danh sách giáo vên theo định dạng: <TENHV TENGV>
@@ -91,7 +91,7 @@ BEGIN
     JOIN HOCVI HV ON HV.MSHV = GH.MSHV
 END
 
--- 8.1 Thực thi
+-- 1.8 Thực thi
 EXEC In_GSGV_HV
 
 -- 9. Yêu cầu: In ra danh sách giáo viên (TENGV), học vị (TENHV) và chuyên ngành  (TENCN) mà giáo viên đó đã đạt được. 
@@ -105,13 +105,13 @@ BEGIN
 	JOIN CHUYENNGANH DT ON DT.MSCN = GH.MSCN
 END
 
--- 9.1 Thực thi
+-- 1.9 Thực thi
 EXEC In_DSGV_HV_CN
 
 -- Bài tập 2. Thủ tục lưu trữ có tham số vào 
 -- a. Thủ tục lưu trữ có một tham số vào 
 
---	1.	Tham số đưa vào: MSSV. Yêu cầu: In ra thông tin của sinh viên tương ứng (TENSV, SODT, LOP, DIACHI).
+--	1. Tham số đưa vào: MSSV. Yêu cầu: In ra thông tin của sinh viên tương ứng (TENSV, SODT, LOP, DIACHI).
 CREATE PROC B2_In_DSSV @MSSV CHAR(8)
 AS
 BEGIN
@@ -125,7 +125,7 @@ EXEC B2_In_DSSV '13520001'
 EXEC B2_In_DSSV '13520006'
 EXEC B2_In_DSSV '13520008'
 
---	2.	Tham số đưa vào: MSDT. Yêu cầu: In ra tên các đề tài tương ứng (TENDT). 
+--	2. Tham số đưa vào: MSDT. Yêu cầu: In ra tên các đề tài tương ứng (TENDT). 
 CREATE PROC B2_In_DSDT @MSDT CHAR(6)
 AS 
 BEGIN
@@ -140,7 +140,7 @@ EXEC B2_In_DSDT '97006'
 EXEC B2_In_DSDT '97090'
 
 
--- 3.	Tham số đưa vào: MSHD. Yêu cầu: In ra thông tin của hội đồng đó (PHONG, TGBD, NGAYHD, TINHTRANG). 
+-- 3. Tham số đưa vào: MSHD. Yêu cầu: In ra thông tin của hội đồng đó (PHONG, TGBD, NGAYHD, TINHTRANG). 
 CREATE PROC B2_In_DSHD @MSHD INT
 AS
 BEGIN
@@ -154,7 +154,7 @@ EXEC B2_In_DSHD 1
 EXEC B2_In_DSHD 3
 EXEC B2_In_DSHD 10
 
---	4.	Tham số đưa vào: TENGV. Yêu cầu: In ra danh sách đề tài (MSDT, TENDT) mà giáo viên đó hướng dẫn.
+--	4. Tham số đưa vào: TENGV. Yêu cầu: In ra danh sách đề tài (MSDT, TENDT) mà giáo viên đó hướng dẫn.
 CREATE PROC In_DSDT_GVHD @TENGV NVARCHAR(30) 
 AS
 BEGIN
@@ -170,7 +170,7 @@ EXEC In_DSDT_GVHD N'Trần Thu Trang'
 EXEC In_DSDT_GVHD N'Chu Tiến'
 EXEC In_DSDT_GVHD N'Nguyễn Văn B'
 
---	5.	Tham số đưa vào: MSDT. Yêu cầu: In ra số lượng sinh viên thực hiện của mỗi đề tài. 
+--	5. Tham số đưa vào: MSDT. Yêu cầu: In ra số lượng sinh viên thực hiện của mỗi đề tài. 
 CREATE PROC B2_DSSV_DT @MSDT CHAR(6)
 AS
 BEGIN
@@ -201,7 +201,7 @@ EXEC B2_In_GSGV_HV '00201'
 EXEC B2_In_GSGV_HV '00204'
 EXEC B2_In_GSGV_HV '00206'
 
---	7.	Tham số đưa vào: MSHD. Yêu cầu: In ra danh sách các đề tài (MSDT, TENDT) có trong hội đồng đó.
+--	7. Tham số đưa vào: MSHD. Yêu cầu: In ra danh sách các đề tài (MSDT, TENDT) có trong hội đồng đó.
 CREATE PROC B2_In_DSDT_HD @MSHD INT
 AS
 BEGIN
@@ -217,8 +217,8 @@ EXEC B2_In_DSDT_HD 3
 
 -- b.Thủ tục lưu trữ có nhiều tham số vào
 
-/* 	8.	Tham số đưa vào: MSGV, TENGV, SODT, DIACHI, MSHH, NAMHH.
-Yêu cầu: Thêm dữ liệu mới vào bảng GIAOVIEN với các thông tin được đưa vào. */
+/* 	8. Tham số đưa vào: MSGV, TENGV, SODT, DIACHI, MSHH, NAMHH.
+	Yêu cầu: Thêm dữ liệu mới vào bảng GIAOVIEN với các thông tin được đưa vào. */
 CREATE PROC B2_Them_DSGV_HH @MSGV CHAR(5), @TENGV NVARCHAR(30), @DIACHI NVARCHAR(50),
 @SODT VARCHAR(10),  @MSHH INT, @NAMHH SMALLDATETIME
 AS
@@ -266,9 +266,9 @@ EXEC B2_Them_DSGV '00222', N'Trần Thị Lung Linh', 'New York', '0123456789', 
 EXEC B2_Them_DSGV '00202', N'Lê Minh Tường', 'Carlifornia', '082344950', 1,'2022'
 EXEC B2_Them_DSGV '00231', N'Đặng Minh Châu', 'Los Angeles', '0987654321', 1, '2011'
 
-/* 10.	* Giống câu 8 và câu 9, nhưng đồng thời kiểm tra xem MSGV có trùng không và MSHH đã tồn tại chưa. 
-Nếu MSGV trùng thì trả về 0, nếu MSHH chưa tồn tại thì trả về 1, 
-ngược lại thì thêm dữ liệu mới, thông báo ‘Thêm dữ liệu thành công’ và trả về giá trị 1. */
+/*	10.	* Giống câu 8 và câu 9, nhưng đồng thời kiểm tra xem MSGV có trùng không và MSHH đã tồn tại chưa. 
+	Nếu MSGV trùng thì trả về 0, nếu MSHH chưa tồn tại thì trả về 1, 
+	ngược lại thì thêm dữ liệu mới, thông báo ‘Thêm dữ liệu thành công’ và trả về giá trị 1. */
 CREATE PROC B2_Them_DSGV_MS_HH @MSGV CHAR(5), @TENGV NVARCHAR(20), @DIACHI NVARCHAR(50),
 @SODT NVARCHAR(10), @MSHH INT, @NAMHH SMALLDATETIME
 AS
@@ -370,7 +370,7 @@ BEGIN
 	END
 END
 
--- 3.1 Thực thi
+-- 3.1.1 Thực thi
 GO
 DECLARE @sdt VARCHAR(10)
 EXEC B3_Tim_SDT @TENGV = N'Nguyễn Văn An', @SDT = @sdt OUT
@@ -407,6 +407,7 @@ BEGIN
 	END
 END
 
+-- 3.1.2 Thực thi và kiểm tra 
 EXEC B2_Them_DSGV '00239', N'Trần Trung', 'US', '2222444488', 1, '2022'
 
 GO
@@ -429,6 +430,8 @@ BEGIN
 		RETURN 0
 	END
 END
+
+SELECT * FROM SV_DETAI, SINHVIEN WHERE SV_DETAI.MSSV = SINHVIEN.MSSV
 
 -- 3.2 Thực thi
 GO
@@ -488,62 +491,113 @@ BEGIN
 		RETURN 0
 	END
 	ELSE
-		SELECT @DTB = (SUM(HD.DIEM) + SUM(PB.DIEM) + SUM(UV.DIEM))/(COUNT (HD.DIEM) + COUNT (PB.DIEM) + COUNT (UV.DIEM))
-		FROM DETAI DT
-		JOIN GV_HDDT HD ON DT.MSDT = HD.MSDT
-		JOIN GV_PBDT PB ON DT.MSDT = PB.MSDT
-		JOIN GV_UVDT UV ON DT.MSDT = UV.MSDT
-		WHERE DT.MSDT = @MSDT
-	
-		IF @DTB IS NULL
+		DECLARE @TONGDIEM FLOAT = 0, @SLGV FLOAT = 0
+		IF EXISTS (SELECT * FROM GV_HDDT WHERE MSDT = @MSDT)
+		BEGIN
+			SELECT @TONGDIEM=SUM(DIEM) + @TONGDIEM, @SLGV=COUNT(*) + @SLGV
+			FROM GV_HDDT
+			WHERE MSDT = @MSDT
+		END
+		ELSE 
 		BEGIN
 			PRINT N'Đề tài chưa được hoàn thành'
 			RETURN 0
 		END
-		ELSE
+
+		IF EXISTS (SELECT * FROM GV_PBDT WHERE MSDT = @MSDT)
+		BEGIN
+			SELECT @TONGDIEM=SUM(DIEM) + @TONGDIEM, @SLGV=COUNT(*) +@SLGV
+			FROM GV_PBDT
+			WHERE MSDT = @MSDT
+		END
+		ELSE 
+		BEGIN
+			PRINT N'Đề tài chưa được hoàn thành'
+			RETURN 0
+		END
+
+		IF EXISTS (SELECT * FROM GV_UVDT WHERE MSDT = @MSDT)
+		BEGIN
+			SELECT @TONGDIEM=SUM(DIEM) + @TONGDIEM, @SLGV=COUNT(*) +@SLGV
+			FROM GV_UVDT
+			WHERE MSDT = @MSDT
+		END
+		ELSE 
+		BEGIN
+			PRINT N'Đề tài chưa được hoàn thành'
+			RETURN 0
+		END
+		
+		SET @DTB = @TONGDIEM/@SLGV
 		BEGIN
 			PRINT N'Điểm trung bình của đề tài ' + @MSDT + N' là: ' + CAST(@DTB AS VARCHAR(5))
 		END
 END 
-
 -- 3.4 Thực thi
 GO
 DECLARE @dtb NUMERIC(5,2)
-EXEC B3_Tinh_DTB '97003', @dtb = @DTB OUT
+EXEC B3_Tinh_DTB '97003', @DTB = @dtb OUT
 
 GO
 DECLARE @dtb NUMERIC(5,2)
-EXEC B3_Tinh_DTB '97005', @dtb = @DTB OUT
+EXEC B3_Tinh_DTB '97005', @DTB = @dtb OUT
 
 GO
 DECLARE @dtb NUMERIC(5,2)
-EXEC B3_Tinh_DTB '97009', @dtb = @DTB OUT
+EXEC B3_Tinh_DTB '97009', @DTB = @dtb OUT
 
 GO
 DECLARE @dtb NUMERIC(5,2)
-EXEC B3_Tinh_DTB '97006', @dtb = @DTB OUT
-	
+EXEC B3_Tinh_DTB '97006', @DTB = @dtb OUT
+
+
 /*	5* .Tham số đưa vào: MSHD. Tham số trả ra: DTB_HD. 
 	Yêu cầu: Đưa vào mã số hội đồng (MSHD), trả ra điểm trung bình các đề tài của hội đồng đó (DTB_HD)*/
-
-CREATE PROC Tinh_DTB_HD @MSHD INT, @DTB_HD NUMERIC(5,2) OUT
+CREATE PROC B3_Tinh_DTB_HD @MSHD INT, @DTB_HD NUMERIC(5,2) OUT
 AS
 BEGIN
-	IF NOT EXISTS (SELECT * FROM HOIDONG_DT WHERE @MSHD = MSHD)
-	BEGIN
-		PRINT N'Không tìm thấy hội đồng'
-		RETURN 0
+    IF NOT EXISTS (SELECT * FROM HOIDONG_DT WHERE @MSHD = MSHD)
+    BEGIN
+        PRINT N'Không tìm thấy hội đồng'
+        RETURN 0
+    END
+    ELSE
+    BEGIN
+        SELECT @DTB_HD = AVG(DIEM) 
+		FROM (
+			 SELECT HD.DIEM FROM HOIDONG_DT HT JOIN GV_HDDT HD ON HT.MSDT = HD.MSDT WHERE HT.MSHD = @MSHD
+			 UNION ALL
+			 SELECT PB.DIEM FROM HOIDONG_DT HT JOIN GV_PBDT PB ON HT.MSDT = PB.MSDT WHERE HT.MSHD = @MSHD
+			 UNION ALL
+			 SELECT UV.DIEM FROM HOIDONG_DT HT JOIN GV_UVDT UV ON HT.MSDT = UV.MSDT WHERE HT.MSHD = @MSHD
+		) AS T
+
+		PRINT N'Điểm trung bình của hội đồng ' + CAST(@MSHD AS VARCHAR(10)) + N' là: ' + CAST(@DTB_HD AS VARCHAR(5))
 	END
-	ELSE
-	BEGIN
-		
-        
+END		
 
+-- 4.5 Thực thi
+GO
+DECLARE @dtb_hd NUMERIC(5,2)
+EXEC B3_Tinh_DTB_HD 1, @DTB_HD = @dtb_hd OUT
 
+GO
+DECLARE @dtb_hd NUMERIC(5,2)
+EXEC B3_Tinh_DTB_HD 2, @DTB_HD = @dtb_hd OUT
 
-/*	6.Đưa vào TENGV và cho biết: Số đề tài hướng dẫn, số đề tài phản biện do giáo 
-viên đó phụ trách. Nếu trùng tên thì có báo lỗi không hay hệ thống sẽ đếm tất cả các đề tài của những giáo viên trùng tên đó? Tại sao? Làm sao để hiện thông báo có bao nhiêu giáo viên trùng tên và trả về thông tin được yêu cầu. Cần lưu ý gì với tham số vào không để không xảy ra lỗi tương tự hoặc tính hết các trường hợp để không báo lỗi và kết quả trả về đúng? 
+GO
+DECLARE @dtb_hd NUMERIC(5,2)
+EXEC B3_Tinh_DTB_HD 3, @DTB_HD = @dtb_hd OUT
+
+/*	6.Đưa vào TENGV và cho biết: Số đề tài hướng dẫn, số đề tài phản biện do giáo viên đó phụ trách. 
+Nếu trùng tên thì có báo lỗi không hay hệ thống sẽ đếm tất cả các đề tài của những giáo viên trùng tên đó? Tại sao?
+Làm sao để hiện thông báo có bao nhiêu giáo viên trùng tên và trả về thông tin được yêu cầu. 
+Cần lưu ý gì với tham số vào không để không xảy ra lỗi tương tự hoặc tính hết các trường hợp để không báo lỗi và kết quả trả về đúng? 
 */
+CREATE PROC B3_Tim_SLDT @TENGV NVARCHAR(30), @SLDT_HD INT OUT, @SLDT_PB INT OUT
+AS
+BEGIN
+	
 
 -- Phần 2. TRIGGER
 /* 1.Tạo Trigger cho ràng buộc: Khi xóa một đề tài thì xóa các thông tin liên quan.
