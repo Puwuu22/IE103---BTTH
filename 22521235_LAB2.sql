@@ -148,7 +148,6 @@ BEGIN
 	FROM HOIDONG
 	WHERE MSHD = @MSHD
 END
-
 -- a3. Thực thi
 EXEC B2_In_DSHD 1
 EXEC B2_In_DSHD 3
@@ -355,9 +354,7 @@ EXEC B2_Update_DSSV '13520008', N'Lê Minh An', N'QUẬN 7'
 
 -- Bài tập 3. Thủ tục lưu trữ có tham số vào và tham số ra 
 
-/*	1.Tham số đưa vào: TENGV. 
-	Tham số trả ra: SDT. 
-	Yêu cầu: Đưa vào họ tên giáo viên (TENGV), trả ra số điện thoại (SDT) của giáo viên đó */
+/*	1.Tham số đưa vào: TENGV. Tham số trả ra: SDT.  Yêu cầu: Đưa vào họ tên giáo viên (TENGV), trả ra số điện thoại (SDT) của giáo viên đó */
 CREATE PROC B3_Tim_SDT @TENGV NVARCHAR(30), @SDT VARCHAR(10) OUT
 AS
 BEGIN
@@ -369,7 +366,6 @@ BEGIN
 		RETURN 0
 	END
 END
-
 -- 3.1.1 Thực thi
 GO
 DECLARE @sdt VARCHAR(10)
@@ -387,8 +383,9 @@ EXEC B3_Tim_SDT @TENGV = N'Lê Quang Danh', @SDT = @sdt OUT
 PRINT @sdt
 
 /* Nếu có nhiều giáo viên trùng tên thì có báo lỗi không, tại sao? Làm sao để hiện thông báo có bao nhiêu giáo viên trùng tên và trả về các SDT? 
-=> Nếu có nhiều GV trùng tên thì sẽ không báo lỗi, mà chỉ trả về sdt của gv đầu tiên được tìm thấy.
+=> Nếu có nhiều GV trùng tên thì sẽ không báo lỗi, mà chỉ trả về sdt của gv đầu tiên được tìm thấy. 
 */
+
 CREATE PROC B3_Tim_SDT_C2 @TENGV NVARCHAR(30), @SDT VARCHAR(10) OUT
 AS
 BEGIN
@@ -398,7 +395,12 @@ BEGIN
 	IF (@count > 1)
 	BEGIN
 		PRINT N'Có ' + CAST(@count AS NVARCHAR) + N' giáo viên trùng tên'
-		SELECT SODT FROM GIAOVIEN WHERE TENGV = @TENGV
+		SELECT MSGV, SODT FROM GIAOVIEN WHERE TENGV = @TENGV
+	END
+	ELSE IF (@count = 1)
+    BEGIN
+        PRINT N'Có 1 giáo viên có tên ' + @TENGV
+        SELECT MSGV, SODT FROM GIAOVIEN WHERE TENGV = @TENGV
 	END
 	ELSE
 	BEGIN
@@ -406,14 +408,12 @@ BEGIN
 		RETURN 0
 	END
 END
-
 -- 3.1.2 Thực thi và kiểm tra 
 EXEC B2_Them_DSGV '00239', N'Trần Trung', 'US', '2222444488', 1, '2022'
 
 GO
 DECLARE @sdt VARCHAR(10)
 EXEC B3_Tim_SDT_C2 @TENGV = N'Trần Trung', @SDT = @sdt OUT
-PRINT @sdt
 
 
 /*	2.Tham số đưa vào: TENSV. 
@@ -431,8 +431,6 @@ BEGIN
 	END
 END
 
-SELECT * FROM SV_DETAI, SINHVIEN WHERE SV_DETAI.MSSV = SINHVIEN.MSSV
-
 -- 3.2 Thực thi
 GO
 DECLARE @msdt CHAR(6)
@@ -449,9 +447,7 @@ DECLARE @msdt CHAR(6)
 EXEC B3_Tim_MSDT N'Lên Văn Lâm', @MSDT = @msdt OUT
 PRINT @msdt
 
-/*	3.Tham số đưa vào: TENHV. 
-	Tham số trả ra: SLGV. 
-	Yêu cầu: Đưa vào tên học vị (TENHV), trả ra số lượng giáo viên (SLGV) đạt học vị đó.*/
+/*	3.Tham số đưa vào: TENHV. Tham số trả ra: SLGV. Yêu cầu: Đưa vào tên học vị (TENHV), trả ra số lượng giáo viên (SLGV) đạt học vị đó.*/
 CREATE PROC B3_Dem_SLGV_HV @TENHV NVARCHAR(20), @SLGV INT OUT
 AS
 BEGIN
@@ -466,7 +462,6 @@ BEGIN
 		PRINT N'Số giáo viên có học vị ' + @TENHV + N' là ' + CAST(@SLGV AS VARCHAR(4))
 	END
 END	
-
 -- 3.3 Thực thi
 GO
 DECLARE @slgv INT
@@ -591,17 +586,89 @@ EXEC B3_Tinh_DTB_HD 3, @DTB_HD = @dtb_hd OUT
 
 /*	6.Đưa vào TENGV và cho biết: Số đề tài hướng dẫn, số đề tài phản biện do giáo viên đó phụ trách. 
 Nếu trùng tên thì có báo lỗi không hay hệ thống sẽ đếm tất cả các đề tài của những giáo viên trùng tên đó? Tại sao?
+==> Nếu trùng sẽ không báo lỗi mà sẽ đếm tất cả đề tài. Do điều kiện WHERE trong các câu lệnh SELECT là TENGV = @TENGV, 
+điều này sẽ khớp với tất cả các giáo viên có tên đã cho.
 Làm sao để hiện thông báo có bao nhiêu giáo viên trùng tên và trả về thông tin được yêu cầu. 
 Cần lưu ý gì với tham số vào không để không xảy ra lỗi tương tự hoặc tính hết các trường hợp để không báo lỗi và kết quả trả về đúng? 
 */
-CREATE PROC B3_Tim_SLDT @TENGV NVARCHAR(30), @SLDT_HD INT OUT, @SLDT_PB INT OUT
+CREATE PROC B3_Dem_SLDT @TENGV NVARCHAR(30), @SLDT_HD INT OUT, @SLDT_PB INT OUT
 AS
 BEGIN
-	
+	IF NOT EXISTS (SELECT * FROM GIAOVIEN WHERE TENGV = @TENGV)
+	BEGIN
+		PRINT N'Không tìm thấy giáo viên'
+		RETURN 0
+	END
+	ELSE
+	BEGIN
+		SELECT @SLDT_HD = COUNT(*) FROM GIAOVIEN GV JOIN GV_HDDT HD ON GV.MSGV = HD.MSGV
+		WHERE TENGV = @TENGV
+
+		SELECT @SLDT_PB = COUNT(*) FROM GIAOVIEN GV JOIN GV_PBDT PB ON GV.MSGV = PB.MSGV
+		WHERE TENGV = @TENGV
+
+		PRINT N'Số đề tài giáo viên ' + @TENGV + N' hướng dẫn là ' + CAST(@SLDT_HD AS VARCHAR(4))
+		PRINT N'Số đề tài giáo viên ' + @TENGV + N' phản biện là ' + CAST(@SLDT_PB AS VARCHAR(4))
+	END
+END
+
+-- 3.6 Thực thi và kiểm tra
+INSERT INTO GV_HDDT VALUES ('00239', '97002', '9')
+INSERT INTO GV_HDDT VALUES ('00239', '97005', '7')
+
+GO 
+DECLARE @sldt_hd INT, @sldt_pb INT 
+EXEC B3_Dem_SLDT N'Trần Trung', @SLDT_HD = @sldt_hd OUT, @SLDT_PB = @sldt_pb OUT
+
+						----KIỂM TRA TRÙNG TÊN---
+CREATE PROC B3_Dem_SLDT_C2 @TENGV NVARCHAR(30), @SLDT_HD INT OUT, @SLDT_PB INT OUT
+AS
+BEGIN
+    DECLARE @count1 INT = 0
+    SELECT @count1 = COUNT(DISTINCT GV.MSGV) 
+    FROM GIAOVIEN GV 
+    JOIN  GV_HDDT HD ON GV.MSGV = HD.MSGV
+    WHERE TENGV = @TENGV
+
+    DECLARE @count2 INT = 0
+    SELECT @count2 = COUNT(DISTINCT GV.MSGV) 
+    FROM GIAOVIEN GV 
+    JOIN  GV_PBDT PB ON GV.MSGV = PB.MSGV
+    WHERE TENGV = @TENGV
+
+    IF @count1 > 1
+    BEGIN
+        PRINT N'Có ' + CAST(@count1 AS NVARCHAR) + N' giáo viên hướng dẫn trùng tên'
+        SELECT GV.MSGV, COUNT(*) FROM GIAOVIEN GV JOIN GV_HDDT HD ON GV.MSGV = HD.MSGV
+        WHERE TENGV = @TENGV
+        GROUP BY GV.MSGV
+    END
+
+    IF @count2 > 1
+    BEGIN
+        PRINT N'Có ' + CAST(@count2 AS NVARCHAR) + N' giáo viên phản biện trùng tên'
+        SELECT GV.MSGV, COUNT(*) FROM GIAOVIEN GV JOIN GV_PBDT PB ON GV.MSGV = PB.MSGV
+        WHERE TENGV = @TENGV
+        GROUP BY GV.MSGV
+    END
+
+    IF @count1 = 1 OR @count2 = 1
+    BEGIN
+        SELECT @SLDT_HD = COUNT(*) FROM GIAOVIEN GV JOIN GV_HDDT HD ON GV.MSGV = HD.MSGV WHERE TENGV = @TENGV
+        SELECT @SLDT_PB = COUNT(*) FROM GIAOVIEN GV JOIN GV_PBDT PB ON GV.MSGV = PB.MSGV WHERE TENGV = @TENGV
+        PRINT N'Số đề tài giáo viên ' + @TENGV + N' hướng dẫn là ' + CAST(@SLDT_HD AS VARCHAR(4))
+        PRINT N'Số đề tài giáo viên ' + @TENGV + N' phản biện là ' + CAST(@SLDT_PB AS VARCHAR(4))
+    END
+    ELSE
+    BEGIN
+        PRINT N'Không tìm thấy giáo viên'
+        RETURN 0
+    END
+END
+
 
 -- Phần 2. TRIGGER
-/* 1.Tạo Trigger cho ràng buộc: Khi xóa một đề tài thì xóa các thông tin liên quan.
-Thực thi với trường hợp: Xóa đề tài có MSDT = ‘97001’ */
+-- 1.Tạo Trigger cho ràng buộc: Khi xóa MỘT đề tài thì xóa các thông tin liên quan.
 CREATE TRIGGER KT_Xoa_DT
 ON DETAI INSTEAD OF DELETE
 AS 
@@ -617,9 +684,56 @@ BEGIN
 END
 
 DELETE FROM DETAI WHERE MSDT = '97001'
+
+		----KHI XÓA NHIỀU DETAI----
+CREATE TRIGGER KT_Xoa_DT
+ON DETAI INSTEAD OF DELETE
+AS 
+BEGIN
+    DELETE FROM SV_DETAI WHERE MSDT IN (SELECT MSDT FROM DELETED)
+    DELETE FROM GV_HDDT WHERE MSDT IN (SELECT MSDT FROM DELETED)
+    DELETE FROM GV_PBDT WHERE MSDT IN (SELECT MSDT FROM DELETED)
+    DELETE FROM GV_UVDT WHERE MSDT IN (SELECT MSDT FROM DELETED)
+    DELETE FROM HOIDONG_DT WHERE MSDT IN (SELECT MSDT FROM DELETED)
+    DELETE FROM DETAI WHERE MSDT IN (SELECT MSDT FROM DELETED)
+END
+
 /* 2.Tạo Trigger cho ràng buộc: Khi xóa một giáo viên thì xóa các thông tin liên quan. 
 Thực thi với trường hợp: Xóa giáo viên có MSGV = ‘00203’. */
+CREATE TRIGGER TRG_KT_Xoa_GV
+ON GIAOVIEN INSTEAD OF DELETE
+AS
+BEGIN
+    -- Vô hiệu hóa ràng buộc khóa ngoại
+    ALTER TABLE HOIDONG_GV NOCHECK CONSTRAINT ALL
+    ALTER TABLE HONGDONG NOCHECK CONSTRAINT ALL
+	ALTER TABLE GV_UVDT NOCHECK CONSTRAINT ALL
+	ALTER TABLE GV_PBDT NOCHECK CONSTRAINT ALL
+	ALTER TABLE GV_HDDT NOCHECK CONSTRAINT ALL
+	ALTER TABLE GV_HV_CN NOCHECK CONSTRAINT ALL
 
+
+    -- Xóa thông tin liên quan từ các bảng khác
+    DELETE FROM HOIDONG_GV WHERE MSGV IN (SELECT MSGV FROM DELETED)
+    DELETE FROM HOIDONG WHERE MSGV IN (SELECT MSGV FROM DELETED)
+    DELETE FROM GV_UVDT WHERE MSGV IN (SELECT MSGV FROM DELETED)
+    DELETE FROM GV_PBDT WHERE MSGV IN (SELECT MSGV FROM DELETED)
+    DELETE FROM GV_HDDT WHERE MSGV IN (SELECT MSGV FROM DELETED)
+    DELETE FROM GV_HV_CN WHERE MSGV IN (SELECT MSGV FROM DELETED)
+
+    -- Xóa giáo viên từ bảng GIAOVIEN
+    DELETE FROM GIAOVIEN WHERE MSGV IN (SELECT MSGV FROM DELETED)
+
+    -- Kích hoạt lại ràng buộc khóa ngoại
+    ALTER TABLE HOIDONG_GV CHECK CONSTRAINT ALL
+    ALTER TABLE HONGDONG CHECK CONSTRAINT ALL
+	ALTER TABLE GV_UVDT CHECK CONSTRAINT ALL
+	ALTER TABLE GV_PBDT CHECK CONSTRAINT ALL
+	ALTER TABLE GV_HDDT CHECK CONSTRAINT ALL
+	ALTER TABLE GV_HV_CN CHECK CONSTRAINT ALL
+END
+
+DELETE FROM GIAOVIEN WHERE MSGV = '00239'
 
 /*3.Tạo Trigger cho ràng buộc: Mỗi hội đồng chấm không quá 3 đề tài. Thực thi với các trường hợp: 
 	•Thêm dữ liệu mới:  
@@ -629,9 +743,54 @@ Thực thi với trường hợp: Xóa giáo viên có MSGV = ‘00203’. */
 		oCập nhật MSHD = 1 cho đề tài có MSDT = ‘97004’ thuộc hội đồng 2. 
 		oCập nhật MSHD = 3 cho đề tài có MSDT = ‘97005’ thuộc hội đồng 1. 
 	* Dùng Group by có được không? Giải thích. */
+-- Cau 3 -- 
+CREATE TRIGGER TRG_KT_HD_DT 
+ON HOIDONG_DT FOR INSERT, UPDATE 
+AS
+BEGIN
+	DECLARE @SLDT INT = 0, @MSHD INT
+	SELECT @MSHD = MSHD FROM INSERTED
+	SELECT @SLDT = COUNT(*) FROM HOIDONG_DT WHERE MSHD = @MSHD
 
+	IF @SLDT > 3
+	BEGIN
+        RAISERROR (N'Thêm đề tài thất bại. Hội đồng %d đã có đủ đề tài.', 16, 1, @MSHD)
+		ROLLBACK TRANSACTION
+	END
+	ELSE
+	BEGIN
+		PRINT N'Thêm đề tài thành công.'
+	END
+END
+-- P2.1 Thực thi
+		-- Thêm dữ liệu --
+INSERT INTO HOIDONG_DT VALUES ('1', '97004', N'Được') 
+INSERT INTO HOIDONG_DT VALUES ('2', '97003', N'Được') 
+		-- Sửa dữ liệu -- 
+UPDATE HOIDONG_DT SET MSHD = '1' WHERE MSDT = '97003' AND MSHD = '2'
+UPDATE HOIDONG_DT SET MSHD = '1' WHERE MSDT = '97005' AND MSHD = '3'
+
+SELECT * FROM HOIDONG_DT
 /* 4.Tạo Trigger cho ràng buộc: Mỗi đề tài có không quá 3 sinh viên tham gia. 
 	Dùng Group by có được không? Giải thích.*/
+CREATE TRIGGER TRG_KT_SV_DT
+ON SV_DETAI FOR INSERT, UPDATE
+AS
+BEGIN
+	DECLARE @SLSV INT = 0, @MSDT CHAR(6)
+	SELECT @MSDT = MSDT FROM INSERTED
+	SELECT @SLSV = COUNT (*) FROM SV_DETAI WHERE @MSDT = MSDT
+
+	IF @SLSV > 3
+	BEGIN
+		RAISERROR (N'Thêm sinh viên thất bại. Đề tài %d đã có đủ sinh viên tham gia.', 16, 1, @MSDT)
+		ROLLBACK TRANSACTION
+	END
+	ELSE
+		PRINT N'Thêm sinh viên thành công'
+END
+
+SELECT * FROM SV_DETAI
 
 /*	5.Tạo Trigger cho ràng buộc: Mỗi sinh viên chỉ được tham gia một đề tài. 
 	Thực thi với các trường hợp: 
@@ -641,9 +800,39 @@ Thực thi với trường hợp: Xóa giáo viên có MSGV = ‘00203’. */
 	•	Sửa dữ liệu đã có: 
 		o	Chuyển đề tài có MSDT = ‘97001’ từ sinh viên có MSSV = ‘13520003’ sang sinh viên có MSSV = ‘13520001’. 
 		o	Chuyển đề tài có MSDT = ‘97004’ từ sinh viên có MSSV = ‘13520001’ sang sinh viên có MSSV = ‘13520005’. */
+-- Cau 5
+CREATE TRIGGER TRG_KT_SV_SLDT 
+ON SV_DETAI FOR INSERT, UPDATE
+AS 
+BEGIN 
+	DECLARE @SLDT INT, @MSSV CHAR(8)
+	SELECT @MSSV = MSSV FROM INSERTED
+	SELECT @SLDT = COUNT(*) FROM SV_DETAI WHERE MSSV = @MSSV
+
+	IF @SLDT > 1
+	BEGIN
+		RAISERROR (N'Thêm dữ liệu thất bại. Mỗi sinh viên chỉ được tham gia một đề tài', 16, 1)
+		ROLLBACK TRANSACTION
+	END
+	ELSE
+		PRINT N'Thêm dữ liệu thành công'
+END
+
+-- P2.5 Thực thi
+			-- Thêm dữ liệu 
+INSERT INTO SV_DETAI VALUES ('13520001', '97003')
+INSERT INTO SV_DETAI VALUES ('13520004', '97006')
+
+			-- Sửa dữ liệu 
+UPDATE SV_DETAI SET MSSV = '13520001' WHERE MSDT = '97001' AND MSSV = '13520003'
+UPDATE SV_DETAI SET MSSV = '13520005' WHERE MSDT = '97004' AND MSSV = '13520001'
 
 -- 6.*Tạo Trigger cho ràng buộc: Một giáo viên muốn có học hàm PGS thì giáo viên đó phải là tiến sĩ. 
-
+CREATE TRIGGER TRG_KT_HH_HV
+ON GIAOVIEN FOR INSERT, UPDATE
+AS
+BEGIN
+IF EXISTS ( SELECT * FROM INSERTED WHERE MSHH=1 AND NOT EXISTS( SELECT * FROM GV_HV_CN WHERE INSERTED.MSGV=GV_HV_CN.MSGV  AND MSHV=4 ))	
 
 -- 7.*Tạo Trigger cho ràng buộc: Năm nhận học vị phải nhỏ hơn hoặc bằng năm nhận học hàm. 
 
