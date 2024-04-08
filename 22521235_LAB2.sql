@@ -383,9 +383,7 @@ EXEC B3_Tim_SDT @TENGV = N'Lê Quang Danh', @SDT = @sdt OUT
 PRINT @sdt
 
 /* Nếu có nhiều giáo viên trùng tên thì có báo lỗi không, tại sao? Làm sao để hiện thông báo có bao nhiêu giáo viên trùng tên và trả về các SDT? 
-=> Nếu có nhiều GV trùng tên thì sẽ không báo lỗi, mà chỉ trả về sdt của gv đầu tiên được tìm thấy. 
-*/
-
+=> Nếu có nhiều GV trùng tên thì sẽ không báo lỗi, mà chỉ trả về sdt của gv đầu tiên được tìm thấy. */
 CREATE PROC B3_Tim_SDT_C2 @TENGV NVARCHAR(30), @SDT VARCHAR(10) OUT
 AS
 BEGIN
@@ -522,7 +520,6 @@ BEGIN
 			PRINT N'Đề tài chưa được hoàn thành'
 			RETURN 0
 		END
-		
 		SET @DTB = @TONGDIEM/@SLGV
 		BEGIN
 			PRINT N'Điểm trung bình của đề tài ' + @MSDT + N' là: ' + CAST(@DTB AS VARCHAR(5))
@@ -744,7 +741,7 @@ DELETE FROM GIAOVIEN WHERE MSGV = '00239'
 		oCập nhật MSHD = 3 cho đề tài có MSDT = ‘97005’ thuộc hội đồng 1. 
 	* Dùng Group by có được không? Giải thích. */
 -- Cau 3 -- 
-CREATE TRIGGER TRG_KT_HD_DT 
+CREATE TRIGGER TRG_KT_SLDT_HD
 ON HOIDONG_DT FOR INSERT, UPDATE 
 AS
 BEGIN
@@ -756,10 +753,6 @@ BEGIN
 	BEGIN
         RAISERROR (N'Thêm đề tài thất bại. Hội đồng %d đã có đủ đề tài.', 16, 1, @MSHD)
 		ROLLBACK TRANSACTION
-	END
-	ELSE
-	BEGIN
-		PRINT N'Thêm đề tài thành công.'
 	END
 END
 -- P2.1 Thực thi
@@ -822,7 +815,6 @@ END
 			-- Thêm dữ liệu 
 INSERT INTO SV_DETAI VALUES ('13520001', '97003')
 INSERT INTO SV_DETAI VALUES ('13520004', '97006')
-
 			-- Sửa dữ liệu 
 UPDATE SV_DETAI SET MSSV = '13520001' WHERE MSDT = '97001' AND MSSV = '13520003'
 UPDATE SV_DETAI SET MSSV = '13520005' WHERE MSDT = '97004' AND MSSV = '13520001'
@@ -832,26 +824,52 @@ CREATE TRIGGER TRG_KT_HH_HV
 ON GIAOVIEN FOR INSERT, UPDATE
 AS
 BEGIN
-IF EXISTS ( SELECT * FROM INSERTED WHERE MSHH=1 AND NOT EXISTS( SELECT * FROM GV_HV_CN WHERE INSERTED.MSGV=GV_HV_CN.MSGV  AND MSHV=4 ))	
+    IF EXISTS (SELECT * FROM INSERTED WHERE MSHH = 1 AND NOT EXISTS (SELECT * FROM GV_HV_CN WHERE INSERTED.MSGV = GV_HV_CN.MSGV AND MSHV=4))
+    BEGIN
+        RAISERROR (N'Lỗi. Giáo viên có học hàm PGS phải là tiến sĩ',16, 8)
+        ROLLBACK TRANSACTION
+    END
+END
 
 -- 7.*Tạo Trigger cho ràng buộc: Năm nhận học vị phải nhỏ hơn hoặc bằng năm nhận học hàm. 
-
+CREATE TRIGGER TRG_KT_NAM_HH_HV
+ON GIAOVIEN FOR INSERT, UPDATE
+AS
+BEGIN
+	IF EXISTS (SELECT 1 FROM INSERTED I INNER JOIN GV_HV_CN HV ON I.MSGV = HV.MSGV 
+		WHERE YEAR(I.NAMHH) < YEAR(HV.NAM))
+	BEGIN
+		RAISERROR (N'Lỗi. Năm nhận học vị phải nhỏ hơn hoặc bằng năm nhận học hàm.', 16, 1)
+		ROLLBACK TRANSACTION
+	END
+END
 -- Phần 3. HÀM
+--	1.Viết hàm in ra thông tin sinh viên (TENSV, SODT, LOP, DIACHI) có mã số sinh viên (MSSV) được truyền vào. 
+CREATE FUNCTION FUNC_In_DSSV(@MSSV CHAR(8))
+RETURNS TABLE
+AS
+RETURN 
+(
+    SELECT TENSV, SODT, LOP, DIACHI
+    FROM SINHVIEN
+    WHERE MSSV = @MSSV
+)
 
-/*	1.Viết hàm in ra thông tin sinh viên (TENSV, SODT, LOP, DIACHI) có mã số sinh viên (MSSV) được truyền vào. 
-	Thực thi với các trường hợp: 
-		•	Truyền vào MSSV = ‘13520001’. 
-		•	Truyền vào MSSV = ‘13520005’. 
-		•	Truyền vào MSSV = ‘13520008’. 
-*/
+-- P3.1 Thực thi
+SELECT * FROM FUNC_In_DSSV('13520001')
+SELECT * FROM FUNC_In_DSSV('13520005')
+SELECT * FROM FUNC_In_DSSV('13520008')
+	
+-- 2.	Viết hàm in ra danh sách sinh viên (TENSV) sinh sống tại địa chỉ (DIACHI) được truyền vào. 
+CREATE FUNCTION FUNC_In_DSSV_DC(@DIACHI NCHAR(50))
+RETURNS TABLE
+AS
+RETURN ( SELECT TENSV FROM SINHVIEN WHERE DIACHI = @DIACHI)
 
-/*	2.	Viết hàm in ra danh sách sinh viên (TENSV) sinh sống tại địa chỉ (DIACHI) được truyền vào. 
-	Thực thi với các trường hợp: 
-	•	Truyền vào DIACHI = ‘QUẬN 1’. 
-	•	Truyền vào DIACHI = ‘THỦ ĐỨC’. 
-	•	Truyền vào DIACHI = ‘GÒ VẤP’.
-*/
-
+-- P3.2 Thực thi
+SELECT * FROM FUNC_In_DSSV_DC(N'QUẬN 1')
+SELECT * FROM FUNC_In_DSSV_DC(N'THỦ ĐỨC')
+SELECT * FROM FUNC_In_DSSV_DC(N'GÒ VẤP')
 
 /*	3.	Viết hàm in ra danh sách sinh viên thực hiện đề tài (MSSV, TENSV) có mã số đề tài (MSDT) được truyền vào. 
 	Thực thi với các trường hợp: 
@@ -859,24 +877,77 @@ IF EXISTS ( SELECT * FROM INSERTED WHERE MSHH=1 AND NOT EXISTS( SELECT * FROM GV
 	•	Truyền vào MSDT = ‘97005’. 
 	•	Truyền vào MSDT = ‘97011’. 
 */
+CREATE FUNCTION FUNC_In_DSSV_DT(@MSDT CHAR(6))
+RETURNS TABLE
+AS
+RETURN 
+(
+	SELECT S.MSSV, TENSV
+	FROM SINHVIEN S JOIN SV_DETAI D ON S.MSSV = D.MSSV
+	WHERE MSDT = @MSDT
+)	
+
+-- P3.3 Thực thi
+SELECT * FROM FUNC_In_DSSV_DT('97004')
+SELECT * FROM FUNC_In_DSSV_DT('97005')
+SELECT * FROM FUNC_In_DSSV_DT('97011')
 
 --	4.Viết hàm in ra danh sách giảng viên (MSGV, TENGV) có phản biện đề tài. 
+CREATE FUNCTION FUNC_In_DSGV_PB()
+RETURNS TABLE
+AS
+RETURN
+(
+	SELECT G.MSGV, TENGV
+	FROM GIAOVIEN G JOIN GV_PBDT P ON G.MSGV = P.MSGV
+)
 
-/*	5.Viết hàm đếm số lượng giáo viên (SLGV) đạt học vị (TENHV) được truyền vào. Nếu không tìm thấy học vị tương ứng thì trả về giá trị ‒1. 
-	Thực thi với các trường hợp: 
-	•	Truyền vào TENHV = ‘Bác sĩ’.
-	•	Truyền vào TENHV = ‘Kỹ sư’. 
-	•	Truyền vào TENHV = ‘Thạc sĩ’. 
-*/
+--	5.Viết hàm đếm số lượng giáo viên (SLGV) đạt học vị (TENHV) được truyền vào. Nếu không tìm thấy học vị tương ứng thì trả về giá trị ‒1. 
+CREATE FUNCTION FUNC_Dem_SLGV_HV(@TENHV NVARCHAR(20))
+RETURNS INT
+AS
+BEGIN
+	DECLARE @SLGV INT
+		
+	SELECT @SLGV = COUNT(*) FROM GV_HV_CN GH
+	JOIN GIAOVIEN GV ON GV.MSGV = GH.MSGV
+	JOIN HOCVI HV ON HV.MSHV = GH.MSHV
+	WHERE TENHV = @TENHV
 
+	IF @SLGV IS NULL
+	SET @SLGV = -1
 
-/*	6.	Viết hàm tính điểm trung bình của đề tài có mã số đề tài (MSDT) được truyền vào (Kết quả làm tròn đến hai chữ số thập phân). Trường hợp không có điểm thì điểm trung bình sẽ là 0. 
-Thực thi với các trường hợp: 
-•	Truyền vào MSDT = ‘97001’.
-•	Truyền vào MSDT = ‘97004’
-•	Truyền vào MSDT = ‘97006’.
-*/
+RETURN @SLGV
+END
+-- P3.5 Thực thi
+SELECT dbo.FUNC_Dem_SLGV_HV(N'Bác sĩ')
+SELECT dbo.FUNC_Dem_SLGV_HV(N'Kỹ sư')
+SELECT dbo.FUNC_Dem_SLGV_HV(N'Thạc sĩ')
 
+--	6.	Viết hàm tính điểm trung bình của đề tài có mã số đề tài (MSDT) được truyền vào (Kết quả làm tròn đến hai chữ số thập phân). Trường hợp không có điểm thì điểm trung bình sẽ là 0. 
+CREATE FUNCTION FUNC_Tinh_DTB(@MSDT CHAR(6))
+RETURNS NUMERIC(5,2)
+AS
+BEGIN
+	DECLARE @DTB NUMERIC(5,2)
+	SELECT @DTB = AVG(DIEM) 
+	FROM
+	(
+		SELECT DIEM FROM GV_HDDT WHERE MSDT = @MSDT
+		UNION ALL
+		SELECT DIEM FROM GV_PBDT WHERE MSDT = @MSDT
+		UNION ALL
+		SELECT DIEM FROM GV_UVDT WHERE MSDT = @MSDT
+	) AS T
+	IF @DTB IS NULL
+	SET @DTB = 0
+RETURN ROUND(@DTB, 2)
+END
+
+-- P3.6 Thực thi
+SELECT dbo.FUNC_Tinh_DTB('97001')
+SELECT dbo.FUNC_Tinh_DTB('97004')
+SELECT dbo.FUNC_Tinh_DTB('97006')
 
 /*	7.	*Viết hàm xếp loại kết quả của đề tài có mã số đề tài (MSDT) được truyền vào:
 •	Kết quả là ‘ĐẠT’ nếu điểm trung bình từ 5 trở lên. 
@@ -886,14 +957,92 @@ Thực thi với các trường hợp:
 •	Truyền vào MSDT = ‘97004’. 
 •	Truyền vào MSDT = ‘97006’. 
 */
+CREATE FUNCTION FUNC_XEPLOAI_DT(@MSDT CHAR(6))
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+	DECLARE @DTB NUMERIC(5,2)
+	DECLARE @XEPLOAI NVARCHAR(20)
+	SELECT @DTB = AVG(DIEM) 
+	FROM
+	(
+		SELECT DIEM FROM GV_HDDT WHERE MSDT = @MSDT
+		UNION ALL
+		SELECT DIEM FROM GV_PBDT WHERE MSDT = @MSDT
+		UNION ALL
+		SELECT DIEM FROM GV_UVDT WHERE MSDT = @MSDT
+	) AS T
 
+	IF @DTB >= 5
+		SET @XEPLOAI = N'ĐẠT'
+	ELSE 
+		SET @XEPLOAI = N'KHÔNG ĐẠT'
 
+	RETURN @XEPLOAI
+END
+
+-- C2 --
+CREATE FUNCTION FUNC_XEPLOAI_DT_C2(@MSDT CHAR(6))
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+	DECLARE @DTB NUMERIC(5,2)
+	SELECT @DTB = dbo.FUNC_Tinh_DTB(@MSDT)
+	
+	IF @DTB >= 5
+		RETURN N'ĐẠT'
+	RETURN N'KHÔNG ĐẠT'
+END
+
+-- P3.7 Thực thi
+SELECT dbo.FUNC_XEPLOAI_DT('97001')
+SELECT dbo.FUNC_XEPLOAI_DT('97004')
+SELECT dbo.FUNC_XEPLOAI_DT('97006')
 --	Phần 4. CON TRỎ
-
 -- Bài tập 1* 
-
 -- 1.	Với những sinh viên tham gia lớp có mã lớp (LOP) bắt đầu bằng ký hiệu ‘IE’, liệt kê MSSV, TENSV và mã lớp (LOP) mà sinh viên đó tham gia. 
+--Khai bao Cursor --
+SELECT * FROM SINHVIEN
+-- Lấy ra danh sách LOP --
+DECLARE CUR_In_DSSV_LOP CURSOR FOR SELECT DISTINCT LOP FROM SINHVIEN
+OPEN CUR_In_DSSV_LOP
+
+DECLARE @LOP CHAR(10)
+
+FETCH NEXT FROM CUR_In_DSSV_LOP INTO @LOP
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    IF (@LOP LIKE 'IE%')
+    BEGIN
+        SELECT MSSV, TENSV, LOP
+        FROM SINHVIEN
+        WHERE LOP = @LOP
+    END
+    FETCH NEXT FROM CUR_In_DSSV_LOP INTO @LOP
+END 
+
+CLOSE CUR_In_DSSV_LOP
+DEALLOCATE CUR_In_DSSV_LOP
+
 -- 2.	Cho biết số lượng sinh viên sống ở ‘QUẬN 1’ (DIACHI). 
+DECLARE CUR_Dem_DSSV_DC CURSOR FOR SELECT DIACHI FROM SINHVIEN
+DECLARE @DIACHI NCHAR(50)
+DECLARE @COUNT INT
+
+OPEN CUR_Dem_DSSV_DC
+
+FETCH NEXT FROM CUR_Dem_DSSV_DC INTO @DIACHI
+WHILE @@FETCH_STATUS = 0
+BEGIN
+	IF @DIACHI = N'QUẬN 1'
+		SET @COUNT = @COUNT + 1
+	FETCH NEXT FROM  CUR_Dem_DSSV_DC INTO @DIACHI
+END
+	PRINT N'Số lượng sinh viên sống ở QUẬN 1 là: ' + CAST(@COUNT AS VARCHAR)
+
+CLOSE CUR_Dem_DSSV_DC
+DEALLOCATE CUR_Dem_DSSV_DC
+
 -- 3.	Cho biết danh sách giáo viên gồm MSGV, TENGV, DIACHI, SODT, TENHH của từng giáo viên. 
 -- 4.	Cho biết danh sách đề tài gồm MSDT, TENDT và số lượng sinh viên thực hiện của mỗi đề tài (nếu có).
 -- 5.	Cho biết số lượng đề tài (SLDT) đã hướng dẫn ứng với từng giáo viên (TENGV).
@@ -901,7 +1050,12 @@ Thực thi với các trường hợp:
 
 -- Bài tập 2* 
 -- Trong cơ sở dữ liệu Quản lý đề tài, tạo một bảng tên là DETAI_DIEM với cấu trúc như sau: DETAI_DIEM (MSDT, DIEMTB) 
+CREATE TABLE DETAI_DIEM (
+	MSDT CHAR(6) PRIMARY KEY,
+	DIEMTB NUMERIC(5,2)
+)
 -- 1.	Khai báo con trỏ dùng để tính điểm trung bình cho từng đề tài, sau đó lưu kết quả vào bảng DETAI_DIEM. 
+
 -- 2.	Gom các bước xử lý của con trỏ ở câu 1 vào một thủ tục lưu trữ. 
 /*3.	Tạo thêm cột XEPLOAI có kiểu là NVARCHAR(20) trong bảng DETAI_DIEM, viết Cursor cập nhật kết quả xếp loại cho mỗi đề tài như sau: 
 •	“Xuất sắc”: Điểm trung bình từ 9 đến 10. 
