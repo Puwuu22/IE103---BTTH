@@ -1,6 +1,6 @@
 ﻿---------------------------Phần 1. THỦ TỤC LƯU TRỮ----------------------------
 -- Bài tập 1. Thủ tục lưu trữ không có tham số vào 
-USE QLDT
+
 -- 1. Yêu cầu: In ra danh sách sinh viên (MSSV, TENSV) có trong bảng SINHVIEN.
 CREATE PROC In_DSSV
 AS
